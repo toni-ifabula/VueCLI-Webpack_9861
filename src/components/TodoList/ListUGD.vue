@@ -16,7 +16,15 @@
                     Tambah
                 </v-btn>
             </v-card-title>
-            <v-data-table :headers="headers" :items="todos" :search="search">
+            <v-data-table 
+                :headers="headers" 
+                :items="todos" 
+                :search="search" 
+                :single-expand="singleExpand"
+                :expanded.sync="expanded"
+                item-key="task"
+                show-expand
+            >
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-btn small class="mr-2" @click="editItem(item)">
                         edit
@@ -31,6 +39,13 @@
                     <v-chip v-if="item.priority === 'Penting'" color="red" outlined>{{item.priority}}</v-chip>
                     <v-chip v-if="item.priority === 'Tidak penting'" color="green" outlined>{{item.priority}}</v-chip>
                     <v-chip v-if="item.priority === 'Biasa'" color="blue" outlined>{{item.priority}}</v-chip>
+                </template>
+
+                <!-- EXPANDABLE -->
+                <template v-slot:expanded-item="{ headers, item }">
+                    <td :colspan="headers.length">
+                        <div align="left">{{ item.note }}</div>
+                    </td>
                 </template>
             </v-data-table>
         </v-card>
@@ -115,7 +130,10 @@ export default {
             editedIndex: -1,
             dialogDelete: false,
             editing: 0,
+            expanded: [],
+            singleExpand: true,
             headers: [
+                { text: '', value: 'data-table-expand' },
                 {
                     text: "Task",
                     align: "start",
@@ -123,7 +141,7 @@ export default {
                     value: "task",
                 },
                 { text: "Priority", value: "priority" },
-                { text: "Note", value: "note" },
+                // { text: "Note", value: "note" },
                 { text: "Actions", value: "actions" },
             ],
             todos: [
