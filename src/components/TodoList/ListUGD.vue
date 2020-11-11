@@ -16,15 +16,17 @@
                     Tambah
                 </v-btn>
             </v-card-title>
-            <v-data-table :headers="headers" :items="todos" :search="search" :item-key="task">
+            <v-data-table :headers="headers" :items="todos" :search="search">
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-btn small class="mr-2" @click="editItem(item)">
                         edit
                     </v-btn>
-                    <v-btn small @click="dialogDelete = true">
+                    <v-btn small @click="showDeleteDialog(item)">
                         delete
                     </v-btn>
                 </template>
+
+                <!-- WARNA PRIORITY -->
                 <template v-slot:[`item.priority`]="{ item }">
                     <v-chip v-if="item.priority === 'Penting'" color="red" outlined>{{item.priority}}</v-chip>
                     <v-chip v-if="item.priority === 'Tidak penting'" color="green" outlined>{{item.priority}}</v-chip>
@@ -92,7 +94,7 @@
                     <v-btn
                         color="red darken-1"
                         text
-                        @click="deleteItem(item)"
+                        @click="deleteItem"
                     >
                         Ya
                     </v-btn>
@@ -109,6 +111,8 @@ export default {
         return {
             search: null,
             dialog: false,
+            index: null,
+            editedIndex: -1,
             dialogDelete: false,
             editing: 0,
             headers: [
@@ -148,8 +152,14 @@ export default {
     },
     methods: {
         save() {
-            this.todos.push(this.formTodo);
+            if (this.index != null) {
+                Object.assign(this.todos[this.index], this.formTodo)
+            } else {
+                this.todos.push(this.formTodo)
+            }
+
             this.resetForm();
+            this.index = null;
             this.dialog = false;
         },
         saveEdit(item) {
@@ -171,18 +181,19 @@ export default {
             };
         },
         editItem(item) {
-            this.editing = 1;
-            this.dialog = true;
-            this.formTodo = {
-                task: item.task,
-                priority: item.priority,
-                note: item.note,
-            };
+            this.dialog = true
+            this.index = this.todos.indexOf(item)
+            this.formTodo = Object.assign({}, item)
         },
-        deleteItem(item) {
-            this.todos.splice(item, 1);
+        showDeleteDialog(item) {
+            this.index = this.todos.indexOf(item);
+            this.dialogDelete = true;
+        },
+        deleteItem() {
+            this.todos.splice(this.index, 1);
             this.dialogDelete = false;
-        }
+            this.index = null;
+        },
     },
 };
 </script>
